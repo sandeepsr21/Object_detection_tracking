@@ -1,9 +1,13 @@
 # Object_detection_tracking
 The purpose of this project is to detect a particular object ( Say a ‘ball’) and track its movement in front of a camera.
 Algorithms – Existing OpenCv Libraries,Hough Transformations, Kalman Filtering
+
 Programming Language - C++
+
 IDE - Microsoft Visual Studio
+
 Add the following to configuration properties->Linker->input
+
 opencv_core2411d.lib
 
 opencv_imgproc2411d.lib
