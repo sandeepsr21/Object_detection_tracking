@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	int notFoundCount = 0;
 
 	//Vector<Point> t20_frames;
-	// >>>> Kalman Filter
+	// >>>> Kalman Filter variables
 	int stateSize = 6;
 	int measSize = 4;
 	int contrSize = 0;
@@ -54,6 +54,7 @@ int main(int argc, char** argv)
 	p1.x = -1;
 	p1.y = -1;
 	Point Pt, Pt1;
+	
 	KalmanFilter kf(stateSize, measSize, contrSize, type);
 
 	Mat state(stateSize, 1, type);  // [x,y,v_x,v_y,w,h]
@@ -68,6 +69,7 @@ int main(int argc, char** argv)
 	// [ 0 0 0  1  0 0 ]
 	// [ 0 0 0  0  1 0 ]
 	// [ 0 0 0  0  0 1 ]
+	
 	setIdentity(kf.transitionMatrix);
 
 	// Measure Matrix H
@@ -75,6 +77,7 @@ int main(int argc, char** argv)
 	// [ 0 1 0 0 0 0 ]
 	// [ 0 0 0 0 1 0 ]
 	// [ 0 0 0 0 0 1 ]
+	
 	kf.measurementMatrix = cv::Mat::zeros(measSize, stateSize, type);
 	kf.measurementMatrix.at<float>(0) = 1.0f;
 	kf.measurementMatrix.at<float>(7) = 1.0f;
@@ -89,6 +92,7 @@ int main(int argc, char** argv)
 	// [ 0    0   0     0     Ew   0  ]
 	// [ 0    0   0     0     0    Eh ]
 	//cv::setIdentity(kf.processNoiseCov, cv::Scalar(1e-2));
+	
 	kf.processNoiseCov.at<float>(0) = 1e-2;
 	kf.processNoiseCov.at<float>(7) = 1e-2;
 	kf.processNoiseCov.at<float>(14) = 5.0f;
@@ -105,9 +109,10 @@ int main(int argc, char** argv)
 	waitKey(0);
 
 
-	/*namedWindow("trackbar", 0);
 
-	//metodo che crea le trackbar(label, finestra, valore da cambiare, valore massimo,action listener)
+
+	// Uncomment this to create track bars and isolate object of interst
+	/*namedWindow("trackbar", 0);
 	createTrackbar("H-min", "trackbar", &H_MIN, 256, onTrackbarSlide);
 	createTrackbar("S-min", "trackbar", &S_MIN, 256, onTrackbarSlide);
 	createTrackbar("V-min", "trackbar", &V_MIN, 256, onTrackbarSlide);
@@ -117,11 +122,13 @@ int main(int argc, char** argv)
 	*/
 
 	while (1) {
+		
 		//store image to matrix
 		capture.read(src);
 		if (!src.data)
 		{
-			return -1;
+			cout<<"ERROR!!";
+			return -1; // Error in capturing
 		}
 
 		ticks = (double)cv::getTickCount();
@@ -138,7 +145,7 @@ int main(int argc, char** argv)
 			//cout << "dT:" << endl << dT << endl;
 
 			state = kf.predict();
-			//	cout << "State post:" << endl << state << endl;
+			//cout << "State post:" << endl << state << endl;
 	
 			
 			predRect.width = state.at<float>(4);
@@ -152,7 +159,8 @@ int main(int argc, char** argv)
 				(0, 198, 255),
 				+1,
 				4);
-
+			
+			// Draw Trajectory
 			if (draw_path)
 			{
 				if (ntrackcount == ntrackframes)
@@ -182,6 +190,7 @@ int main(int argc, char** argv)
 
 		cvtColor(src, hsv, COLOR_BGR2HSV);
 		inRange(hsv, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), mask);
+		
 	       //inRange(hsv, Scalar(29, 86, 6), Scalar(64, 255, 255), mask);
 	       //inRange(hsv, Scalar(26, 75, 67), Scalar(256, 256, 256), mask);
 	       /// Convert it to gray
@@ -202,21 +211,15 @@ int main(int argc, char** argv)
 	
 
 		/// Apply the Hough Transform to find the circles
-		//HoughCircles(mask, circles, CV_HOUGH_GRADIENT, 1, mask.rows / 20, 100, 100, 0, 0);
 		HoughCircles(mask, circles, CV_HOUGH_GRADIENT, 2, mask.rows / 4, 100, 40, 10, 120);
-		/// Draw the circles detected
-
+	
+		/// Draw a rectangle around the circle detected
 		for (size_t i = 0; i < circles.size(); i++)
 		{
 			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 			int radius = cvRound(circles[i][2]);
 			// circle center
 			circle(src, center, 3, Scalar(0, 0, 255), -1, 8, 0);
-			// circle outline
-			//circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
-			//t20_frames.size() = circles.size();
-			//p2.x = center.x;
-			//p2.y = center.y;
 			boundRect1[ntrackcount].x = center.x;
 			boundRect1[ntrackcount].y = center.y;
 			r.x = center.x - (radius + 10);
@@ -224,15 +227,7 @@ int main(int argc, char** argv)
 			r.height = (center.x) + (radius + 10);
 			r.width = (center.y) + (radius + 10);
 			draw_path = true;
-
-			/*	rectangle(src,
-				cvPoint(center.x-(radius+10),center.y-(radius+10)),
-					cvPoint((center.x) + (radius + 10), (center.y) + (radius + 10)),
-					(0, 198, 255),
-					+1,
-					4);*/
-
-			}
+		}
 			
 			ntrackcount++;
 
@@ -291,5 +286,5 @@ int main(int argc, char** argv)
 		imshow("mask", mask);
 		waitKey(1);
 	}
-	return 0;
+	return 0;//exit program
 }
