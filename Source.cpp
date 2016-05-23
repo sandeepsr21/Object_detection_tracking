@@ -58,17 +58,16 @@ int main(int argc, char** argv)
 
 	Mat state(stateSize, 1, type);  // [x,y,v_x,v_y,w,h]
 	Mat meas(measSize, 1, type);    // [z_x,z_y,z_w,z_h]
-										//cv::Mat procNoise(stateSize, 1, type)
-										// [E_x,E_y,E_v_x,E_v_y,E_w,E_h]
-
-										// Transition State Matrix A
-										// Note: set dT at each processing step!
-										// [ 1 0 dT 0  0 0 ]
-										// [ 0 1 0  dT 0 0 ]
-										// [ 0 0 1  0  0 0 ]
-										// [ 0 0 0  1  0 0 ]
-										// [ 0 0 0  0  1 0 ]
-										// [ 0 0 0  0  0 1 ]
+	//cv::Mat procNoise(stateSize, 1, type)
+	// [E_x,E_y,E_v_x,E_v_y,
+	// Transition State Matrix A
+	// Note: set dT at each processing step!
+	// [ 1 0 dT 0  0 0 ]
+	// [ 0 1 0  dT 0 0 ]
+	// [ 0 0 1  0  0 0 ]
+	// [ 0 0 0  1  0 0 ]
+	// [ 0 0 0  0  1 0 ]
+	// [ 0 0 0  0  0 1 ]
 	setIdentity(kf.transitionMatrix);
 
 	// Measure Matrix H
@@ -183,9 +182,9 @@ int main(int argc, char** argv)
 
 		cvtColor(src, hsv, COLOR_BGR2HSV);
 		inRange(hsv, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), mask);
-	//	inRange(hsv, Scalar(29, 86, 6), Scalar(64, 255, 255), mask);
-		//inRange(hsv, Scalar(26, 75, 67), Scalar(256, 256, 256), mask);
-	    /// Convert it to gray
+	       //inRange(hsv, Scalar(29, 86, 6), Scalar(64, 255, 255), mask);
+	       //inRange(hsv, Scalar(26, 75, 67), Scalar(256, 256, 256), mask);
+	       /// Convert it to gray
 		
 		rectErosione = getStructuringElement(MORPH_RECT, Size(3, 3));
 		erode(mask, mask, rectErosione);
@@ -207,37 +206,35 @@ int main(int argc, char** argv)
 		HoughCircles(mask, circles, CV_HOUGH_GRADIENT, 2, mask.rows / 4, 100, 40, 10, 120);
 		/// Draw the circles detected
 
-			for (size_t i = 0; i < circles.size(); i++)
-			{
-				Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-				int radius = cvRound(circles[i][2]);
-				// circle center
-				circle(src, center, 3, Scalar(0, 0, 255), -1, 8, 0);
-				// circle outline
-				//circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
-				//t20_frames.size() = circles.size();
-				//p2.x = center.x;
-				//p2.y = center.y;
-				boundRect1[ntrackcount].x = center.x;
-				boundRect1[ntrackcount].y = center.y;
-				r.x = center.x - (radius + 10);
-				r.y = center.y - (radius + 10);
-				r.height = (center.x) + (radius + 10);
-				r.width = (center.y) + (radius + 10);
-				draw_path = true;
+		for (size_t i = 0; i < circles.size(); i++)
+		{
+			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+			int radius = cvRound(circles[i][2]);
+			// circle center
+			circle(src, center, 3, Scalar(0, 0, 255), -1, 8, 0);
+			// circle outline
+			//circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
+			//t20_frames.size() = circles.size();
+			//p2.x = center.x;
+			//p2.y = center.y;
+			boundRect1[ntrackcount].x = center.x;
+			boundRect1[ntrackcount].y = center.y;
+			r.x = center.x - (radius + 10);
+			r.y = center.y - (radius + 10);
+			r.height = (center.x) + (radius + 10);
+			r.width = (center.y) + (radius + 10);
+			draw_path = true;
 
-				/*	rectangle(src,
-						cvPoint(center.x-(radius+10),center.y-(radius+10)),
-						cvPoint((center.x) + (radius + 10), (center.y) + (radius + 10)),
-						(0, 198, 255),
-						+1,
-						4);*/
+			/*	rectangle(src,
+				cvPoint(center.x-(radius+10),center.y-(radius+10)),
+					cvPoint((center.x) + (radius + 10), (center.y) + (radius + 10)),
+					(0, 198, 255),
+					+1,
+					4);*/
 
 			}
 			
 			ntrackcount++;
-
-
 
 		if (circles.size() == 0)
 		{
@@ -285,9 +282,9 @@ int main(int argc, char** argv)
 
 
 			
-								  //			cout << "Measure matrix:" << endl << meas << endl;
+		 //cout << "Measure matrix:" << endl << meas << endl;
 		}
-	/// Show your results
+		/// Show your results
 		//namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
 		imshow("Demo", src);
 		//imshow("hsv", hsv);
